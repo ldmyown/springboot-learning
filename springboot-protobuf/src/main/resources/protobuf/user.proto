@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_package = "com.telangel.protobuf";
+option java_outer_classname = "User";
+
+message UserRequest {
+    string username = 1;
+}
+
+message UserResponse {
+    string username = 1;
+    int64 age = 2;
+    string dept = 3;
+    string job = 4;
+}
