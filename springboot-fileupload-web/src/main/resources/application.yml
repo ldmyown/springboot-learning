@@ -1,0 +1,15 @@
+# 默认的profile为dev，其他环境通过指定启动参数使用不同的profile，比如：
+#   测试环境：java -jar fileupload.jar --spring.profiles.active=test
+#   生产环境：java -jar fileupload.jar --spring.profiles.active=prod
+spring:
+  profiles:
+    active: dev
+
+# 配置端口
+server:
+  port: 9090
+  servlet:
+    context-path: /
+    session:
+      timeout: 30
+
