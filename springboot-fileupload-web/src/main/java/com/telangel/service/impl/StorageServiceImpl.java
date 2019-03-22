@@ -106,27 +106,38 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public void uploadFileByMappedByteBuffer(MultipartFileParam param) throws IOException {
-        String fileName = param.getName();
-        String tmpFileName = fileName + "_tmp";
-        File dir = new File(rootPath, DateUtils.format(new Date()));
-        File tmpFile = new File(dir, tmpFileName);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        FileChannel fileChannel = null;
 
-        long offset = chunkSize * param.getChunk();
-        RandomAccessFile accessFile = new RandomAccessFile(tmpFile, "rw");
-        FileChannel fileChannel = accessFile.getChannel();
-        byte[] fileData = param.getFile().getBytes();
-        MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, offset, fileData.length);
-        mappedByteBuffer.put(fileData);
-        // 释放
-        FileMD5Util.freedMappedByteBuffer(mappedByteBuffer);
-        fileChannel.close();
+        String fileName;
+        File tmpFile;
+        try {
+            fileName = param.getName();
+            String tmpFileName = fileName + "_tmp";
+            File dir = new File(rootPath, DateUtils.format(new Date()));
+            tmpFile = new File(dir, tmpFileName);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            long offset = chunkSize * param.getChunk();
+            RandomAccessFile accessFile = new RandomAccessFile(tmpFile, "rw");
+            fileChannel = accessFile.getChannel();
+            byte[] fileData = param.getFile().getBytes();
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, offset, fileData.length);
+            mappedByteBuffer.put(fileData);
+            // 释放
+            FileMD5Util.freedMappedByteBuffer(mappedByteBuffer);
+            fileChannel.close();
+        } finally {
+            if (fileChannel != null && fileChannel.isOpen()) {
+                fileChannel.close();
+            }
+        }
         // 检测是否已经传输完成，并且设置传输进度
         Boolean isOk = checkAndSetProgress(param);
         if(isOk) {
-            renameFile(tmpFile, fileName);
+            boolean result = renameFile(tmpFile, fileName);
+            log.info("重命名结果：{}", Boolean.valueOf(result));
             log.info("文件{}上传完成", fileName);
         }
 
