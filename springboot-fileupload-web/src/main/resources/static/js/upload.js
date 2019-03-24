@@ -1,7 +1,6 @@
 var $btn = $('#ctlBtn');
 var $pursebtn = $('#purseBtn');
 var $thelist = $('#thelist');
-var $cancleBtn = $('#cancleBtn');
 // 此处的大小和后端约定，保持一致
 var chunkSize = 5 * 1024 * 1024;
 

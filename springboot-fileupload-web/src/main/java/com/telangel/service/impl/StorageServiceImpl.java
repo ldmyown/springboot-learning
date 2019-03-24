@@ -3,13 +3,12 @@ package com.telangel.service.impl;
 import com.telangel.constant.Constants;
 import com.telangel.param.MultipartFileParam;
 import com.telangel.service.StorageService;
+import com.telangel.util.CacheUtils;
 import com.telangel.util.DateUtils;
 import com.telangel.util.FileMD5Util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 
@@ -43,11 +42,8 @@ public class StorageServiceImpl implements StorageService {
     @Value("${breakpoint.upload.chunkSize}")
     private Long chunkSize;
 
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-
     @Override
-    public void init() {
+    public void init() throws IOException {
         File dir = new File(rootPath);
         if (dir.exists()) {
             log.info("文件根目录已经存在不需要创建，根目录为 {}", dir.getAbsoluteFile());
@@ -64,14 +60,32 @@ public class StorageServiceImpl implements StorageService {
             confDir.mkdirs();
             log.info("文件进度目录不存在，创建成功，根目录为 {}", confDir.getAbsoluteFile());
         }
+        // 读取本地已经存在的文件到缓存中
+        File[] confMd5files = confDir.listFiles();
+        for (File confMd5file : confMd5files) {
+            String md5 = confMd5file.getName();
+            File confFile = confMd5file.listFiles()[0];
+            byte[] bytes = FileUtils.readFileToByteArray(confFile);
+            boolean flag = true;
+            for (int i = 0; i < bytes.length; i++) {
+                // 有未完成的部分直接标记为未完成
+                if (Byte.MAX_VALUE != bytes[i]) {
+                    flag = false;
+                    break;
+                }
+            }
+            CacheUtils.cache.hset(Constants.FILE_UPLOAD_STATUS, md5, String.valueOf(flag));
+            CacheUtils.cache.set(Constants.FILE_MD5_KEY + md5, confFile.getAbsolutePath());
+
+        }
     }
 
     @Override
     public void deleteAll() {
         log.info("开发初始化清理数据，start");
         FileSystemUtils.deleteRecursively(new File(rootPath));
-        stringRedisTemplate.delete(Constants.FILE_UPLOAD_STATUS);
-        stringRedisTemplate.delete(Constants.FILE_MD5_KEY);
+        CacheUtils.cache.del(Constants.FILE_UPLOAD_STATUS);
+        CacheUtils.cache.del(Constants.FILE_MD5_KEY);
         log.info("开发初始化清理数据，end");
     }
 
@@ -174,14 +188,14 @@ public class StorageServiceImpl implements StorageService {
         }
         if (isComplete) {
             // 已经完成， 则更新文件上传状态和文件的路径
-            stringRedisTemplate.opsForHash().put(Constants.FILE_UPLOAD_STATUS, param.getMd5(), "true");
+            CacheUtils.cache.hset(Constants.FILE_UPLOAD_STATUS, param.getMd5(), "true");
             return true;
         } else {
-            if (!stringRedisTemplate.opsForHash().hasKey(Constants.FILE_UPLOAD_STATUS, param.getMd5())) {
-                stringRedisTemplate.opsForHash().put(Constants.FILE_UPLOAD_STATUS, param.getMd5(), "false");
+            if (!CacheUtils.cache.hHasKey(Constants.FILE_UPLOAD_STATUS, param.getMd5())) {
+                CacheUtils.cache.hset(Constants.FILE_UPLOAD_STATUS, param.getMd5(), "false");
             }
-            if (stringRedisTemplate.hasKey(Constants.FILE_MD5_KEY + param.getMd5())) {
-                stringRedisTemplate.opsForValue().set(Constants.FILE_MD5_KEY + param.getMd5(), confFile.getAbsolutePath());
+            if (!CacheUtils.cache.hasKey(Constants.FILE_MD5_KEY + param.getMd5())) {
+                CacheUtils.cache.set(Constants.FILE_MD5_KEY + param.getMd5(), confFile.getAbsolutePath());
             }
             return false;
         }

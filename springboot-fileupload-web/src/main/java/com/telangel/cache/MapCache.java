@@ -8,12 +8,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * Created by 13 on 2017/2/7.
  */
-public class MapCache {
+public class MapCache<T> implements ICache{
 
     /**
      * 默认存储1024个缓存
      */
     private static final int DEFAULT_CACHES = 1024;
+
+    private static final int MAX_CACHE = 1024 * 20;
 
     private static final MapCache INS = new MapCache();
 
@@ -37,11 +39,12 @@ public class MapCache {
     /**
      * 读取一个缓存
      *
+     * @param key
      * @param key 缓存key
-     * @param <T>
      * @return
      */
-    public <T> T get(String key) {
+    @Override
+    public T get(String key) {
         CacheObject cacheObject = cachePool.get(key);
         if (null != cacheObject) {
             long cur = System.currentTimeMillis() / 1000;
@@ -63,10 +66,10 @@ public class MapCache {
      *
      * @param key   缓存key
      * @param field 缓存field
-     * @param <T>
      * @return
      */
-    public <T> T hget(String key, String field) {
+    @Override
+    public T hget(String key, String field) {
         key = key + ":" + field;
         return this.get(key);
     }
@@ -77,6 +80,7 @@ public class MapCache {
      * @param key   缓存key
      * @param value 缓存value
      */
+    @Override
     public void set(String key, Object value) {
         this.set(key, value, -1);
     }
@@ -88,10 +92,11 @@ public class MapCache {
      * @param value   缓存value
      * @param expired 过期时间，单位为秒
      */
+    @Override
     public void set(String key, Object value, long expired) {
         expired = expired > 0 ? System.currentTimeMillis() / 1000 + expired : expired;
-        //cachePool大于800时，强制清空缓存池，这个操作有些粗暴会导致误删问题，后期考虑用redis替代MapCache优化
-        if (cachePool.size() > 800) {
+        //cachePool大于MAX_CACHE时，强制清空缓存池，这个操作有些粗暴会导致误删问题，后期考虑用redis替代MapCache优化
+        if (cachePool.size() > MAX_CACHE) {
             cachePool.clear();
         }
         CacheObject cacheObject = new CacheObject(key, value, expired);
@@ -105,6 +110,7 @@ public class MapCache {
      * @param field 缓存field
      * @param value 缓存value
      */
+    @Override
     public void hset(String key, String field, Object value) {
         this.hset(key, field, value, -1);
     }
@@ -117,6 +123,7 @@ public class MapCache {
      * @param value   缓存value
      * @param expired 过期时间，单位为秒
      */
+    @Override
     public void hset(String key, String field, Object value, long expired) {
         key = key + ":" + field;
         expired = expired > 0 ? System.currentTimeMillis() / 1000 + expired : expired;
@@ -129,8 +136,31 @@ public class MapCache {
      *
      * @param key 缓存key
      */
+    @Override
     public void del(String key) {
         cachePool.remove(key);
+    }
+
+    /**
+     * 缓存是否存在
+     * @param key
+     * @return
+     */
+    @Override
+    public boolean hasKey(String key) {
+        return cachePool.containsKey(key);
+    }
+
+    /**
+     * hash缓存是否存在
+     * @param key
+     * @param field
+     * @return
+     */
+    @Override
+    public boolean hHasKey(String key, String field) {
+        key = key + ":" + field;
+        return cachePool.containsKey(key);
     }
 
     /**
@@ -139,6 +169,7 @@ public class MapCache {
      * @param key   缓存key
      * @param field 缓存field
      */
+    @Override
     public void hdel(String key, String field) {
         key = key + ":" + field;
         this.del(key);
@@ -147,6 +178,7 @@ public class MapCache {
     /**
      * 清空缓存
      */
+    @Override
     public void clean() {
         cachePool.clear();
     }

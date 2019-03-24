@@ -3,15 +3,14 @@ package com.telangel.controller;
 import com.telangel.constant.Constants;
 import com.telangel.param.MultipartFileParam;
 import com.telangel.service.StorageService;
+import com.telangel.util.CacheUtils;
 import com.telangel.vo.Result;
 import com.telangel.vo.ResultVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,9 +32,6 @@ import java.util.List;
 public class FileController {
 
     @Autowired
-    StringRedisTemplate stringRedisTemplate;
-
-    @Autowired
     StorageService storageService;
 
     /**
@@ -46,7 +42,7 @@ public class FileController {
      */
     @RequestMapping(value = "/checkFileMd5", method = RequestMethod.POST)
     public ResultVo checkFileMd5(String md5) throws IOException {
-        Object o = stringRedisTemplate.opsForHash().get(Constants.FILE_UPLOAD_STATUS, md5);
+        Object o = CacheUtils.cache.hget(Constants.FILE_UPLOAD_STATUS, md5);
         // 文件没有上传
         if (o == null) {
             return new ResultVo(Result.NO_HAVE);
@@ -58,7 +54,7 @@ public class FileController {
         }
         // 文件上传了一部分
         else {
-            String value = stringRedisTemplate.opsForValue().get(Constants.FILE_MD5_KEY + md5);
+            String value = (String)CacheUtils.cache.get(Constants.FILE_MD5_KEY + md5);
             // 在redis中没有存储进度文件的地址，则重新上传
             if (StringUtils.isEmpty(value)) {
                 return new ResultVo(Result.NO_HAVE);
@@ -104,5 +100,7 @@ public class FileController {
         }
         return ResponseEntity.ok().body("上传成功");
     }
+
+
 
 }

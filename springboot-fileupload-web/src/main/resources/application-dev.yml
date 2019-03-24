@@ -6,10 +6,12 @@ logging:
 breakpoint:
   upload:
     # 文件上传目录
-    dir: D:/data0/uploads/
+    dir: D:/data0/uploads
+    cache: 2
     #1024*1024=1 048 576,5M=5 242 880 单个块的大小
     chunkSize: 5 242 880
-
+  download:
+    port: 8080
 spring:
   servlet:
     multipart:

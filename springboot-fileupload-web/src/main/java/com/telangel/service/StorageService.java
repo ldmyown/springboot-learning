@@ -13,7 +13,7 @@ public interface StorageService {
     /**
      * 初始化方法
      */
-    void init();
+    void init() throws IOException;
 
     void deleteAll();
 
