@@ -146,7 +146,7 @@ uploader.onUploadBeforeSend = function (obj, data) {
 
 // 上传过程中触发，携带上传进度
 uploader.on('uploadProgress', function (file, percentage) {
-    percentage = percentage.toFixed(2)
+    percentage = percentage.toFixed(2);
     getProgressBar(file, percentage, "FILE", "上传进度");
 });
 
@@ -192,6 +192,7 @@ $pursebtn.on('click', function () {
  * @param titleName 标题名
  */
 function getProgressBar(file, percentage, id_Prefix, titleName) {
+    percentage = percentage.toFixed(2)
     var $li = $('#' + file.id), $percent = $li.find('#' + id_Prefix + '-progress-bar');
     // 避免重复创建
     if (!$percent.length) {

@@ -64,7 +64,11 @@ public class StorageServiceImpl implements StorageService {
         File[] confMd5files = confDir.listFiles();
         for (File confMd5file : confMd5files) {
             String md5 = confMd5file.getName();
-            File confFile = confMd5file.listFiles()[0];
+            File[] files = confMd5file.listFiles();
+            if (files.length == 0) {
+                continue;
+            }
+            File confFile = files[0];
             byte[] bytes = FileUtils.readFileToByteArray(confFile);
             boolean flag = true;
             for (int i = 0; i < bytes.length; i++) {

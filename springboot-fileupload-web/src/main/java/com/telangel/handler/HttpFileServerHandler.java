@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.regex.Pattern;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.*;
@@ -161,7 +162,6 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
      * @param msg
      * @throws Exception
      */
-    @Override
     protected void messageReceived(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         doHandlerHttpRequest(ctx, msg);
     }
@@ -373,9 +373,11 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
 
     public String sanitizeUri(String uri) {
         try {
+            uri = URLEncoder.encode(uri, "UTF-8");
             uri = URLDecoder.decode(uri, "UTF-8");
         } catch (Exception e) {
             try {
+                uri = URLEncoder.encode(uri, "ISO-8859-1");
                 uri = URLDecoder.decode(uri, "ISO-8859-1");
             } catch (Exception ew) {
                 ew.printStackTrace();
@@ -409,7 +411,7 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
         builder.append("目录:");
         builder.append("</title></head><body>\r\n");
         builder.append("<h3>");
-        builder.append(dirPath).append("目录:");
+        builder.append("文件服务器：");
         builder.append("</h3>\r\n");
         builder.append("<ul>");
         url = url.replace("/", File.separator);
@@ -473,4 +475,8 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
         decoder = null;
     }
 
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
+        doHandlerHttpRequest(ctx, msg);
+    }
 }
