@@ -1,0 +1,4 @@
+file:
+  download:
+    port: 8080
+    dir: D:/data0

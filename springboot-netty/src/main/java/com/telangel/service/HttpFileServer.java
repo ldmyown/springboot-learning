@@ -8,6 +8,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 /**
  * @version 1.0.0
@@ -17,21 +19,24 @@ import org.slf4j.LoggerFactory;
  * @author： lid
  * @date： 2019/3/13 16:02
  */
+@Service
 public class HttpFileServer {
 
-    public static String WEBROOT = "/root";
-    public static int PORT = 8080;
+    @Value("${file.download.dir}")
+    public String webroot;
+    @Value("${file.download.port}")
+    public int port;
 
     private static Logger logger = LoggerFactory.getLogger(HttpFileServer.class);
 
-    public void run(final int port, final String url) throws InterruptedException {
+    public void run() throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new FileServerInitializer(url));
+                    .childHandler(new FileServerInitializer(webroot));
             ChannelFuture future = bootstrap.bind(port).sync();
            logger.info("服务器已启动>>网址:" + "127.0.0.1:" + port);
             future.channel().closeFuture().sync();
@@ -40,11 +45,6 @@ public class HttpFileServer {
             workerGroup.shutdownGracefully();
         }
 
-    }
-
-    public static void main() throws InterruptedException {
-
-        new HttpFileServer().run(PORT, WEBROOT);
     }
 
 }
