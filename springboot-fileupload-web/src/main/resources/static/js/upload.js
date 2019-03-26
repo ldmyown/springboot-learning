@@ -18,6 +18,7 @@ WebUploader.Uploader.register({
         // 根据文件内容来查询MD5
         uploader.md5File(file).progress(function (percentage) {   // 及时显示进度
             console.log('计算md5进度:', percentage);
+            percentage = percentage.toFixed(2);
             // 生成md5进度条
             getProgressBar(file, percentage, "MD5", "MD5");
         }).then(function (val) { // MD5计算完成
@@ -192,7 +193,6 @@ $pursebtn.on('click', function () {
  * @param titleName 标题名
  */
 function getProgressBar(file, percentage, id_Prefix, titleName) {
-    percentage = percentage.toFixed(2)
     var $li = $('#' + file.id), $percent = $li.find('#' + id_Prefix + '-progress-bar');
     // 避免重复创建
     if (!$percent.length) {

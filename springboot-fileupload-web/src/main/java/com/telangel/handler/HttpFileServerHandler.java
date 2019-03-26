@@ -344,20 +344,17 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
                         System.err.println("progress:" + progress + "/" + total);
                     }
                 }
-
                 @Override
                 public void operationComplete(ChannelProgressiveFuture future) {
                     System.err.println("complete");
                 }
             });
 
-
             ChannelFuture lastChannelFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
             if (!isKeepAlive(msg)) {
                 lastChannelFuture.addListener(ChannelFutureListener.CLOSE);
 
             }
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
@@ -366,7 +363,6 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
             e.printStackTrace();
             sendError(ctx, HttpResponseStatus.NOT_FOUND);
         }
-
     }
 
     private static final Pattern INSECURE_URI = Pattern.compile(".*[<>&\"].*");
