@@ -1,0 +1,45 @@
+<%layout("/common/layout.html",{title:"首页"}){%>
+
+<% for(var i = 0;i< page.list.~size; i = i+2 ){%>
+<div class="row">
+    <div class="col-md-6 col-sm-6">
+        <article class=" blog-teaser">
+            <header>
+                <img src="${page.list[i].img}" alt="">
+                <h3><a href="${ctxPath}/detail?id=${page.list[i].id!}">
+                    ${page.list[i].category!}-${page.list[i].title!"无标题"}
+                </a></h3>
+                <span class="meta">${page.list[i].createTime, "yyyy-MM-dd HH:mm:ss"}</span>
+                <hr>
+            </header>
+
+        </article>
+    </div>
+    <%if(i+1 < page.list.~size){%>
+    <div class="col-md-6 col-sm-6">
+        <article class=" blog-teaser">
+            <header>
+                <img src="${page.list[i].img}" alt="">
+                <h3><a href="${ctxPath}/detail?id=${page.list[i].id!}">
+                    ${page.list[i+1].category!}-${page.list[i+1].title!"无标题"}
+                </a></h3>
+                <span class="meta">${page.list[i].createTime, "yyyy-MM-dd HH:mm:ss"}</span>
+                <hr>
+            </header>
+
+        </article>
+    </div>
+    <%}%>
+</div>
+<%}%>
+<div class="paging">
+        <%if(page.pageNumber<=1){%>
+        <a href="/">首页</a>
+        <%}else{%>
+        <a href="/?pageNum=${page.pageNumber - 1}&keyword=${keyword!}&category=${category!}">上一页</a>
+        <%}%>
+        <%if(page.totalPage > page.pageNumber){%>
+        <a href="/?pageNum=${page.pageNumber + 1}&keyword=${keyword!}&category=${category!}">下一页</a>
+        <%}%>
+</div>
+<%}%>
