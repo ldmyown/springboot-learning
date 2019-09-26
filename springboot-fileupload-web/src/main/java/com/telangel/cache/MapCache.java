@@ -1,5 +1,7 @@
 package com.telangel.cache;
 
+import org.springframework.stereotype.Component;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -8,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * Created by 13 on 2017/2/7.
  */
+@Component
 public class MapCache<T> implements ICache{
 
     /**
@@ -16,12 +19,6 @@ public class MapCache<T> implements ICache{
     private static final int DEFAULT_CACHES = 1024;
 
     private static final int MAX_CACHE = 1024 * 20;
-
-    private static final MapCache INS = new MapCache();
-
-    public static MapCache single() {
-        return INS;
-    }
 
     /**
      * 缓存容器
