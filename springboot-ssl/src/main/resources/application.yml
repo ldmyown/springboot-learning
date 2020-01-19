@@ -1,0 +1,17 @@
+server:
+  ssl:
+    key-store: classpath:server1.p12
+    key-store-password: 123456
+    key-store-type: PKCS12
+    key-alias: server
+    trust-store: trust.p12
+    trust-store-password: 123456
+    client-auth: need
+    trust-store-type: JKS
+    trust-store-provider: SUN
+  port: 8801
+
+logging:
+  level:
+    ROOT: info
+    com.koal.cloud: info

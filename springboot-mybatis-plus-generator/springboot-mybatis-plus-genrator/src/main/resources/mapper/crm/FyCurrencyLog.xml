@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lqf.springbootmybatisplusgenrator.dao.crm.FyCurrencyLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.lqf.springbootmybatisplusgenrator.bean.crm.FyCurrencyLog">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="op_uid" property="opUid" />
+        <result column="user_type" property="userType" />
+        <result column="status" property="status" />
+        <result column="currency_type" property="currencyType" />
+        <result column="is_give" property="isGive" />
+        <result column="num" property="num" />
+        <result column="cash" property="cash" />
+        <result column="original_num" property="originalNum" />
+        <result column="reason_type" property="reasonType" />
+        <result column="op_type" property="opType" />
+        <result column="area" property="area" />
+        <result column="remark" property="remark" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, op_uid, user_type, status, currency_type, is_give, num, cash, original_num, reason_type, op_type, area, remark, create_time
+    </sql>
+
+</mapper>

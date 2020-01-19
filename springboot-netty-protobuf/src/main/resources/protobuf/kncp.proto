@@ -1,0 +1,1068 @@
+syntax = "proto3";
+
+option java_package = "com.telangel.protobuf";
+option java_outer_classname = "Kncp";
+option java_multiple_files = false;
+
+message ProtoMessage{
+
+    PackType packType = 1;
+
+    oneof Pack{
+        KNCP_RESPONSE kncpResponse = 2;
+        KNCP_RESPONSE_CHALLENGE kncpResponseChallenge = 3;
+        KNCP_REQUEST_LOGIN kncpRequestLogin = 4;
+
+    }
+}
+
+// 包的类型
+enum PackType {
+    LOGIN = 0;
+    CREATE_TASK = 1;
+    DELETE_TASK = 2;
+}
+
+///
+message KNCP_RESPONSE {
+    uint32 nErrCode = 1;
+
+}
+///-------------------------login --------------------------///
+/// @brief 客户端向服务端发送消息
+/// KNCP_REQUEST_CHALLENGE 空
+/// @brief 服务端向客户端发送响应
+message KNCP_RESPONSE_CHALLENGE {
+    uint32 nErrCode = 1;
+    uint32 nExpectAuthMode = 2;
+    uint32 nCertInterfaceType = 3;
+    bytes nChallengeData = 4;
+}
+
+/// KNCP_REQUEST_LOGIN_V8
+message KNCP_REQUEST_LOGIN {
+    string szCertCn = 1; // certCN 或 登陆用户名
+    string szEMail = 2; // 证书版本并且校验email时才会用到.
+    string szPswData = 3; // 口令版密码: (base64(md5(psw)))
+    string szChallenge = 4; // 口令版 challenge序列
+    string szEncryptCert = 5; // 证书版本(CSP,SDK)的客户端加密证书,DER格式(二进制)
+    string szSignCert = 6; // 证书版本(CSP,SDK)的客户端签名证书,DER格式(二进制)
+    string szSignedData = 7; // 证书版本,对challenge序列的签名,二进制格式
+    string szPrintCodeData = 8; // 无key打印随机码: (base64(md5(PrintCode)))
+    string szToken = 9; //普密登录票据信息
+    uint32 nShareFile = 10;
+}
+//
+///// KNCP_RESPONSE_LOGIN_V7
+//message KNCP_RESPONSE_LOGIN {
+//    uint32 nErrCode = 1;
+//    uint32 nUserId = 2; /// add userId
+//    bytes szUserName = 3;
+//    uint32 nRole = 4;
+//}
+//
+/////-----------------
+///// 提交print审批请求
+///// KNCP_REQUEST_SUBMIT_PRINT
+//message KNCP_REQUEST_SUBMIT_PRINT {
+//    uint64 nFileId = 1;
+//    uint32 nCopies = 2;
+//    uint32 nPages = 3;
+//    uint32 nFlags = 4;
+//    uint32 nPrintOpts = 5;
+//    repeated uint32 nReviewer = 6; // 修改字段名称!
+//    bytes szDesc = 7;
+//}
+///// KNCP_RESPONSE_SUBMIT_PRINT
+//message KNCP_RESPONSE_SUBMIT_PRINT {
+//    uint32 nErrCode = 1;
+//}
+//
+/////-------------------------attr --------------------------///
+///// @brief 设定/获取 指定文件属性
+//
+//// nAttr 修改的属性名,定义在FileSystemDef.h
+//// const uint32_t FA_ATTR_SECLEVEL      = 0x00000001;
+//// const uint32_t FA_ATTR_DIR_SIZE      = 0x00000002;
+//// const uint32_t FA_ATTR_CHD_FCNT      = 0x00000004;
+//// const uint32_t FA_ATTR_CHD_DCNT      = 0x00000008;
+//// const uint32_t FA_ATTR_PRINT_OPTS    = 0x00000010;
+//// const uint32_t FA_ATTR_REVIEW_STATUS = 0x00000020;
+//// const uint32_t FA_ATTR_NOKEY_STATUS  = 0x00000040;
+//
+//// nAttrType 属性值的数据类型
+//// const uint32_t KNCP_FATYPE_INTEGER   = 0x00000001;
+//// const uint32_t KNCP_FATYPE_STRING    = 0x00000002;
+//
+//message KNCP_REQUEST_CHGATTR {
+//    uint64 nFileId = 1;
+//    uint32 nAttr = 2;
+//    uint32 nAttrType = 3;
+//    uint32 nIntValue = 4;
+//    bytes strValue = 5;
+//}
+//message KNCP_RESPONSE_CHGATTR {
+//    uint32 nErrCode = 1;
+//}
+//
+//message KNCP_REQUEST_GETATTR {
+//    uint64 nFileId = 1;
+//    uint32 nAttr = 2;
+//}
+//message KNCP_RESPONSE_GETATTR {
+//    uint32 nErrCode = 1;
+//    uint32 nAttr = 2;
+//    uint32 nAttrType = 3;
+//    uint32 nIntValue = 4;
+//    bytes strValue = 5;
+//}
+//
+///// @brief 改变公共文件的所有者KNCP_CMD_CHGOWNER
+//message KNCP_REQUEST_CHGOWNER {
+//    uint64 nFileId = 1;
+//    uint32 nNewOwnerId = 2;
+//}
+//message KNCP_RESPONSE_CHGOWNER {
+//    uint32 nErrCode = 1;
+//}
+//
+///// @brief 修改口令
+//message KNCP_REQUEST_CHGPWD {
+//    bytes szOldPwd = 1;
+//    bytes szNewPwd = 2;
+//}
+//message KNCP_RESPONSE_CHGPWD {
+//    uint32 nErrCode = 1;
+//}
+//
+///// @brief 检查部门变化        =========== to change
+///// KNCP_REQUEST_CHKDEPTCHG
+///// KNCP_DEPTCHG_REC
+//message KNCP_DEPTCHG_REC {
+//    uint32 nUserId = 1;
+//    bytes szUserName = 2;
+//    uint32 nAct = 3;
+//}
+///// KNCP_RESPONSE_CHKDEPTCHG
+//message KNCP_RESPONSE_CHKDEPTCHG {
+//    uint32 nErrCode = 1;
+//    //repeated KNCP_DEPTCHG_REC recs=2;
+//    uint32 nChanged = 2;
+//}
+//
+///// @brief 查询与该用户相关的因部门调整而需要重新制作数字信封的文件
+///// KNCP_REQUEST_CHKDIRTFILE
+//message KNCP_REQUEST_CHKDIRTFILE {
+//    uint32 nDirtFileOwner = 1;
+//}
+//
+///// KNCP_DIRTFILE_REC
+//message KNCP_DIRTFILE_REC {
+//    uint32 nDeptId = 1;
+//    bytes szDeptName = 2;
+//    uint64 nFileId = 3;
+//    uint32 nStatus = 4;
+//}
+///// KNCP_RESPONSE_CHKDIRTFILE_V4
+//message KNCP_RESPONSE_CHKDIRTFILE {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_DIRTFILE_REC recs = 2;
+//}
+//
+///// @brief 查询用户
+///// KNCP_REQUEST_CHKUSER
+//message KNCP_REQUEST_CHKUSER {
+//    bytes szEmail = 1;
+//}
+///// KNCP_RESPONSE_CHKUSER
+//message KNCP_RESPONSE_CHKUSER {
+//    uint32 nErrCode = 1;
+//    uint32 nUserId = 2;
+//    bytes szName = 3;
+//}
+//
+///// KNCP_REQUEST_CLOSEFILE
+//message KNCP_REQUEST_CLOSEFILE {
+//    uint64 nFileId = 1;
+//    uint32 nSambaStatus = 2; //0:关闭普通文件   1：关闭共享文件
+//}
+///// return ==================================??
+//
+//message KNCP_RESPONSE_CLOSEFILE {
+//    uint32 nError = 1;
+//    uint32 nShareCount = 2; //当前打开共享文件用户数量
+//}
+//
+///// KNCP_REQUEST_DATA_DONE
+//message KNCP_REQUEST_DATA_DONE {
+//    uint64 nSize = 1;
+//    bytes szUpldPath = 2;
+//    bytes szStorPath = 3;
+//}
+///// KNCP_RESPONSE_DATA_DONE
+//message KNCP_RESPONSE_DATA_DONE {
+//    uint32 nErrCode = 1;
+//}
+//
+///// KNCP_REQUEST_DONE
+//message KNCP_REQUEST_DONE {
+//    uint64 nObjId = 1;
+//    uint32 nOp = 2;
+//}
+///// KNCP_RESPONSE_DONE
+//message KNCP_RESPONSE_DONE {
+//    uint32 nErrCode = 1;
+//}
+//
+///// KNCP_REQUEST_EXIT_V7
+//message KNCP_REQUEST_EXIT {
+//    uint32 nFlags = 1;
+//}
+///// return ==================================??
+//
+///// KNCP_REQUEST_FILE_LOG
+//message KNCP_REQUEST_FILE_LOG {
+//    uint64 nFileId = 1;
+//}
+//message KNCP_LOG_RECORD {
+//    bytes szUserName = 1;
+//    uint32 nAccessMode = 2;
+//    bytes szOpenTime = 3;
+//    bytes szCloseTime = 4;
+//    uint32 nUserId = 5;
+//}
+///// KNCP_RESPONSE_FILE_LOG
+//message KNCP_RESPONSE_FILE_LOG {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_LOG_RECORD recs = 2;
+//}
+//
+///// KNCP_REQUEST_FINDFILE_V4
+//message KNCP_REQUEST_FINDFILE {
+//    bytes szContent = 1;
+//    uint32 nFlag = 2;
+//    bytes szBeginTime = 3;
+//    bytes szEndTime = 4;
+//    bytes szUserName = 5;
+//    uint32 nMinSecLevel = 6;
+//    uint32 nMaxSecLevel = 7;
+//}
+//// KNCP_RESPONSE_FINDFILE_RECORD_V6
+//message KNCP_RESPONSE_FINDFILE_RECORD {
+//    uint32 cType = 1;
+//    uint64 nRecId = 2;
+//    uint64 nParentId = 3;
+//    uint64 nFileSize = 4;
+//    bytes szTime = 5;
+//    uint32 nPrivType = 6;
+//    bytes szName = 7;
+//    uint32 nCreaterId = 8;
+//    bytes szCreaterName = 9;
+//    uint32 nSecLevel = 10;
+//}
+///// KNCP_RESPONSE_FINDFILE
+//message KNCP_RESPONSE_FINDFILE {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_RESPONSE_FINDFILE_RECORD recs = 2;
+//}
+//
+///// KNCP_REQUEST_GETCERT
+//message KNCP_REQUEST_GETCERT {
+//    bytes szUniqueID = 1;
+//    uint32 nCertType = 2;
+//}
+//message KNCP_CERT_REC {
+//    bytes szCert = 1;
+//}
+///// KNCP_RESPONSE_GETCERT
+//message KNCP_RESPONSE_GETCERT {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_CERT_REC rec = 2;
+//}
+//
+///// KNCP_REQUEST_GETCHAIN   empty
+///// response KNCP_RESPONSE_GETCERT
+//
+///// KNCP_REQUEST_COFINFO
+//message KNCP_REQUEST_COFINFO {
+//    uint64 nDeptId = 1;
+//}
+///// KNCP_RESPONSE_COFINFO
+//message KNCP_RESPONSE_COFINFO {
+//    uint32 nErrCode = 1;
+//    uint64 nQuota = 2;
+//    uint64 nFree = 3;
+//    uint64 nSingleMax = 4;
+//    uint64 nDeptQuota = 5;
+//    uint64 nDeptFree = 6;
+//    uint64 nDeptSingleMax = 7;
+//    uint32 cAllowListDelimiter = 8;
+//    bytes szAllowList = 9;
+//}
+//
+///// KNCP_REQUEST_FILE_PRIV
+//message KNCP_REQUEST_FILE_PRIV {
+//    uint64 nFileId = 1;
+//}
+///// KNCP_RESPONSE_FILE_PRIV
+//message KNCP_RESPONSE_FILE_PRIV {
+//    uint32 nErrCode = 1;
+//    uint32 nPrivilege = 2;
+//}
+//
+///// KNCP_REQUEST_GETFILEKEYWORD
+//message KNCP_REQUEST_GETFILEKEYWORD {
+//    uint64 nFileId = 1;
+//}
+///// KNCP_RESPONSE_GETFILEKEYWORD
+//message KNCP_RESPONSE_GETFILEKEYWORD {
+//    uint32 nErrCode = 1;
+//    bytes szKeyWord = 2;
+//}
+//
+///// KNCP_REQUEST_GETFILEBRIEF
+//message KNCP_REQUEST_GETFILEBRIEF {
+//    uint64 nFileId = 1;
+//}
+///// KNCP_RESPONSE_GETFILEBRIEF
+//message KNCP_RESPONSE_GETFILEBRIEF {
+//    uint32 nErrCode = 1;
+//    bytes szBrief = 2;
+//}
+//
+///// KNCP_REQUEST_GETPATH
+//message KNCP_REQUEST_GETPATH {
+//    uint64 nId = 1;
+//}
+///// KNCP_RESPONSE_GETPATH
+//message KNCP_RESPONSE_GETPATH {
+//    uint32 nErrCode = 1;
+//    bytes szPath = 2;
+//}
+//
+///// KNCP_REQUEST_GET_PRIV
+//message KNCP_REQUEST_GET_PRIV {
+//    uint64 nFileId = 1;
+//}
+//
+//
+//enum tagPrivRecordStatus {
+//    STATUS_PRIV_RECORD_DEFAULT = 0x00000000; // protobuf3中第一个必须为0，这里预留
+//    STATUS_PRIV_RECORD_REFER = 0x00000001; //待审批
+//    STATUS_PRIV_RECORD_APPROVED = 0x00000002; //审批通过
+//    STATUS_PRIV_RECORD_REFUSED = 0x00000004; //审批拒绝
+//    STATUS_PRIV_RECORD_SUBMIT_FAILED = 0x00000008; //提交失败
+//    STATUS_PRIV_RECORD_NORMAL = 0x00000010; //正常授权: 授权通过
+//    STATUS_PRIV_RECORD_EXPRIRED = 0x00000100; //过期
+//    STATUS_PRIV_RECORD_CANCELED = 0x00002000; //被取消
+//    STATUS_PRIV_RECORD_UPDATED = 0x00004000; //文件被更新
+//}
+//
+///// KNCP_PRIVILEGE_RECORD_V4
+//message KNCP_PRIVILEGE_RECORD {
+//    uint32 nPrivilegedUserId = 1;
+//    bytes szPrivilegedUserName = 2;
+//    bytes szPrivilegedCertCn = 3;
+//    bytes szPrivilegedEmail = 4;
+//    uint32 nPrivilege = 5;
+//    bytes szBeginTime = 6;
+//    bytes szEndTime = 7;
+//    uint32 nStatus = 8;
+//    uint64 nReviewItemId = 9;
+//}
+//
+///// KNCP_RESPONSE_GET_PRIV_V4
+//message KNCP_RESPONSE_GET_PRIV {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_PRIVILEGE_RECORD recs = 2;
+//}
+//
+///// KNCP_REQUEST_GET_RCL
+//message KNCP_REQUEST_GET_RCL {
+//    uint32 nUserId = 1;
+//    uint32 nReviewType = 2;
+//}
+///// KNCP_RESPONSE_GET_RCL
+//message KNCP_RESPONSE_GET_RCL {
+//    uint32 nErrCode = 1;
+//    uint32 rcl = 2;
+//}
+//
+///// KNCP_REQUEST_REVIEW_DETAIL
+//message KNCP_REQUEST_REVIEW_DETAIL {
+//    uint64 nObjId = 1;
+//    uint32 nShareType = 2; //0:授权审批信息获取  1：分享审批信息获取
+//}
+//message REVIEW_DETAIL {
+//    uint64 nObjId = 1;
+//    bytes szDesc = 2;
+//    bytes szSubmitTime = 3;
+//    uint32 nReviewer = 4;
+//    bytes szReviewerName = 5;
+//    bytes szReviewerCode = 6;
+//    bytes szReviewTime = 7;
+//    uint32 nReviewStatus = 8;
+//}
+//message KNCP_RESPONSE_REVIEW_DETAIL {
+//    uint32 nErrCode = 1;
+//    repeated REVIEW_DETAIL rds = 2;
+//}
+//
+///// KNCP_REQUEST_GETSITECERT empty
+///// KNCP_CERT_REC
+///// return KNCP_RESPONSE_GETCERT
+//
+///// CKofCmdHello empty
+//
+//message KNCP_REQUEST_LS {
+//    uint64 nId = 1;
+//    uint32 nFlags = 2;
+//}
+///// nFlag 取值
+///// const uint32_t LSF_FILE      = 0x00000001;//只包括指定目录下的文件
+///// const uint32_t LSF_DIRECTORY = 0x00000002;//只包括指定目录下的目录
+///// const uint32_t LSF_SELF      = 0x00000004;//显示指定条目自己的信息
+///// const uint32_t LSF_RECURSIVE = 0x00000008;//遍历所有子目录
+///// const uint32_t LSF_OWN       = 0x00000010;//创建者为当前用户
+///// const uint32_t LSF_PATH      = 0x00000020;//文件名为全路径
+///// // 授权人 列出自己的授权文件
+///// const uint32_t LSF_SHARED    = 0x00000040;//所有被授权的文件
+///// const uint32_t LSF_VIEW_TYPE_PRINT_TERM = 0x01000000;
+///// const uint32_t LSF_VIEW_TYPE_PC_PRT     = 0x02000000;
+///// const uint32_t LSF_SHARED_FILE = LSF_FILE|LSF_RECURSIVE|LSF_SHARED;//所有被授权的文件
+///// const uint32_t LSF_SHARED_DIR  = LSF_DIRECTORY|LSF_RECURSIVE|LSF_SHARED;//所有被授权的目录
+///// const uint32_t LSF_OWN_FILE    = LSF_FILE|LSF_RECURSIVE|LSF_OWN;//所有自己创建的文件
+///// const uint32_t LSF_ONLY_WITHOUT_KEY_STATUS = 0x00000080; //只显示有无key打印状态的文件
+//
+///// typedef struct _KNCP_RESPONSE_LSDIR_V4 KNCP_RESPONSE_LS;
+///// KNCP_RESPONSE_LSDIR
+//
+///// KNCP_REQUEST_LSDIR empty
+/////
+///// KNCP_FILE_RECORD_V7
+//message KNCP_FILE_RECORD {
+//    uint32 cType = 1;
+//    uint64 nRecId = 2;
+//    uint64 nParentId = 3;
+//    uint64 nFileSize = 4;
+//    bytes szTime = 5;
+//    uint32 nPrivType = 6;
+//    bytes szName = 7;
+//    uint32 nCreaterId = 8;
+//    bytes szCreaterName = 9;
+//    uint32 nPrivilegedCnt = 10;
+//    uint32 nStatus = 11;
+//    uint32 nExpiredPrivilegeCnt = 12;
+//    uint32 nSecurityLevel = 13;
+//    uint32 nPrtPages = 14;
+//    uint32 nPrtCopies = 15;
+//    uint32 nReviewFlags = 16;
+//    uint32 nReviewStatus = 17;
+//    uint32 nLastReviewStep = 18;
+//    bytes szSharedUserName = 19;
+//    uint32 nWithoutKey = 20;
+//    bytes sHeldUser = 21;
+//    uint32 nHeld = 22;
+//    uint32 nReviewType = 23; // 1 打印  2 授权  4 分享
+//}
+//message KNCP_RESPONSE_LSDIR {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_FILE_RECORD recs = 2;
+//}
+//
+//
+//message KNCP_REQUEST_LSFILE {
+//    uint64 nFileId = 1;
+//    uint32 nShareStatus = 2;
+//    uint32 nShareType = 3;
+//}
+//
+//message KNCP_RESPONSE_LSFILE {
+//    uint32 nErrCode = 1;
+//    bytes szFileServer = 2;
+//    bytes szNameAtFileSvr = 3;
+//    bytes szEnvelopName = 4;
+//    bytes szUsrAtFileSvr = 5;
+//    bytes szPwdAtFileSvr = 6;
+//    uint32 nPrivilege = 7;
+//    uint32 nHeldstatus = 8;
+//    uint32 nShareCount = 9;
+//}
+//
+///// KNCP_REQUEST_LSSVR empty
+///// KNCP_SERVER_RECORD
+//message KNCP_SERVER_RECORD {
+//    uint32 nIp = 1;
+//    uint32 nValue = 2;
+//}
+//message KNCP_RESPONSE_LSSVR {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_SERVER_RECORD recs = 2;
+//}
+//
+///// KNCP_REQUEST_LSUSR_V5
+//message KNCP_REQUEST_LSUSR {
+//    uint32 nFlags = 1;
+//    uint32 nDeptId = 2;
+//}
+///// KNCP_USER_RECORD_V7
+//message KNCP_USER_RECORD {
+//    uint32 nUserId = 1;
+//    bytes szCertCN = 2;
+//    bytes szEmail = 3;
+//    bytes szUserName = 4;
+//    uint32 nDeptId = 5;
+//    bytes szDeptName = 6;
+//    bytes szPyName = 7;
+//    uint32 nSecLevel = 8;
+//    uint32 nReviewerCanViewContent = 9;
+//    uint32 nReviewerLevel = 10;
+//    bytes szReviewerLevelDesc = 11;
+//}
+///// KNCP_RESPONSE_LSUSR_V7
+//message KNCP_RESPONSE_LSUSR {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_USER_RECORD recs = 2;
+//}
+//
+///// KNCP_RESPONSE_LSDIR_V4  == KNCP_RESPONSE_LS
+//message KNCP_RESPONSE_LS {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_FILE_RECORD recs = 2;
+//}
+/////-----------------
+///// 创建子目录
+///// KNCP_REQUEST_MKDIR
+//message KNCP_REQUEST_MKDIR {
+//    uint64 nParentId = 1;
+//    bytes szDirName = 2;
+//}
+///// KNCP_RESPONSE_MKDIR
+//message KNCP_RESPONSE_MKDIR {
+//    uint32 nErrCode = 1;
+//    uint64 nDirId = 2;
+//}
+//
+/////-----------------
+///// KNCP_REQUEST_MKFILE_V6
+//message KNCP_REQUEST_MKFILE {
+//    uint64 nDirId = 1;
+//    bytes szName = 2;
+//    uint64 nSize = 3;
+//    uint32 nSecLevel = 4;
+//}
+///// KNCP_RESPONSE_MKFILE
+//message KNCP_RESPONSE_MKFILE {
+//    uint32 nErrCode = 1;
+//    bytes szProtocol = 2;
+//    bytes szFileServer = 3;
+//    uint32 nPort = 4;
+//    bytes szDirAtFileServer = 5;
+//    bytes szDeptEnvelopName = 6;
+//    bytes szUserAtFileServer = 7;
+//    bytes szPassword = 8;
+//}
+/////-----------------
+///// KNCP_REQUEST_MKFILE_CMT_V7
+//message KNCP_REQUEST_MKFILE_CMT {
+//    bytes szFileNameAtFileSvr = 1;
+//    bytes szEnvelopName = 2;
+//    uint64 nParentId = 3;
+//    bytes szFileName = 4;
+//    uint64 nSize = 5;
+//    uint32 nSecLevel = 6;
+//    uint32 nPages = 7;
+//    uint32 nCopies = 8;
+//    bytes szEnvelopedKey = 9;
+//}
+///// KNCP_RESPONSE_MKFILE_CMT
+//message KNCP_RESPONSE_MKFILE_CMT {
+//    uint32 nErrCode = 1;
+//    uint64 nFileId = 2;
+//}
+/////-----------------
+///// KNCP_REQUEST_MODIFYFILE
+//message KNCP_REQUEST_MODIFYFILE {
+//    uint64 nFileId = 1;
+//    uint64 nSize = 2;
+//}
+//
+/////-----------------
+///// 移动文件或目录
+///// KNCP_REQUEST_MOVE
+//message KNCP_REQUEST_MOVE {
+//    uint64 nFileId = 1;
+//    uint64 nDstId = 2;
+//}
+///// KNCP_RESPONSE_MOVE
+//message KNCP_RESPONSE_MOVE {
+//    uint32 nErrCode = 1;
+//}
+/////-----------------
+///// 打开文件 请求
+///// KNCP_REQUEST_OPENFILE
+//message KNCP_REQUEST_OPENFILE {
+//    uint64 nFileId = 1;
+//    uint32 nAccessMode = 2;
+//    uint32 nShareStatus = 3; //0：不是共享编辑  1：共享编辑
+//}
+///// KNCP_RESPONSE_OPENFILE
+//message KNCP_RESPONSE_OPENFILE {
+//    uint32 nErrCode = 1;
+//    uint32 nPrivilege = 2;
+//    bytes szMsg = 3;
+//}
+/////-----------------
+///// KNCP_REQUEST_RENAME
+//message KNCP_REQUEST_RENAME {
+//    uint64 nFileId = 1;
+//    bytes szNewName = 2;
+//}
+///// KNCP_RESPONSE_RENAME
+//message KNCP_RESPONSE_RENAME {
+//    uint32 nErrCode = 1;
+//}
+/////-----------------
+///// KNCP_REQUEST_RESTOREFILEKEY
+//message KNCP_REQUEST_RESTOREFILEKEY {
+//    uint64 nFileId = 1;
+//}
+///// KNCP_RESPONSE_RESTOREFILEKEY
+//message KNCP_RESPONSE_RESTOREFILEKEY {
+//    uint32 nErrCode = 1;
+//    bytes filekey = 2;
+//}
+/////-----------------
+///// 审核
+///// KNCP_REQUEST_REVIEW
+//message KNCP_REQUEST_REVIEW {
+//    uint64 nObjId = 1;
+//    uint32 nResult = 2;
+//    bytes szMemo = 3;
+//    uint32 nShareType = 4; //增加文件分享类型
+//}
+///// KNCP_RESPONSE_REVIEW
+//message KNCP_RESPONSE_REVIEW {
+//    uint32 nErrCode = 1;
+//}
+/////-----------------
+///// KNCP_REQUEST_RMDIR_V4
+//message KNCP_REQUEST_RMDIR {
+//    uint64 nDirId = 1;
+//    uint32 nFlags = 2;
+//}
+/////-----------------
+///// KNCP_REQUEST_RMFILE
+//message KNCP_REQUEST_RMFILE {
+//    uint64 nFileId = 1;
+//    uint32 nFlags = 2;
+//}
+///// KNCP_REQUEST_RMFILE_V4
+////message KNCP_REQUEST_RMFILE_V4
+////{
+////	 uint32 nFileId=1;
+////     uint32 nFlags=2;
+////}
+//
+/////-----------------
+///// KNCP_REQUEST_RSTDIRTFILE
+//message KNCP_REQUEST_RSTDIRTFILE {
+//    uint64 nFileId = 1;
+//}
+///// KNCP_RESPONSE_RSTDIRTFILE
+//message KNCP_RESPONSE_RSTDIRTFILE {
+//    uint32 nErrCode = 1;
+//}
+/////-----------------
+///// KNCP_REQUEST_SETFILEKEYWORD
+//message KNCP_REQUEST_SETFILEKEYWORD {
+//    uint64 nFileId = 1;
+//    bytes szKeyWord = 2;
+//}
+///// KNCP_RESPONSE_SETFILEKEYWORD
+//message KNCP_RESPONSE_SETFILEKEYWORD {
+//    uint32 nErrCode = 1;
+//}
+/////-----------------
+///// KNCP_REQUEST_SETFILEBRIEF
+//message KNCP_REQUEST_SETFILEBRIEF {
+//    uint64 nFileId = 1;
+//    bytes szBrief = 2;
+//}
+///// KNCP_RESPONSE_SETFILEBRIEF
+//message KNCP_RESPONSE_SETFILEBRIEF {
+//    uint32 nErrCode = 1;
+//}
+/////-----------------
+///// KNCP_MODIFY_PRIV_RECORD
+//message KNCP_MODIFY_PRIV_RECORD {
+//    uint32 nPrivilegedUserId = 1;
+//    uint32 nPrivilege = 2;
+//    bytes szBeginTime = 3;
+//    bytes szEndTime = 4;
+//    uint32 nModifyType = 5;
+//}
+///// KNCP_REQUEST_SET_PRIV
+//message KNCP_REQUEST_SET_PRIV {
+//    uint64 nFileId = 1;
+//    uint32 nFlags = 2;
+//    repeated KNCP_MODIFY_PRIV_RECORD recs = 3;
+//}
+///// KNCP_RESPONSE_SET_PRIV
+//message KNCP_RESPONSE_SET_PRIV {
+//    uint32 nErrCode = 1;
+//    uint32 nEnvelopeCnt = 2;
+//    uint32 nAllowCnt = 3;
+//    uint32 nRefuseCnt = 4;
+//    uint32 nReviewCnt = 5;
+//    repeated KNCP_USER_RECORD recs = 6;
+//}
+//
+/////-----------------
+///// 授权审批请求
+///// KNCP_REQUEST_SUBMIT_REVIEW
+//message KNCP_REQUEST_SUBMIT_REVIEW {
+//    uint64 nFileId = 1;
+//    uint32 nFlags = 2;
+//    repeated uint32 nReviewer = 3;
+//    bytes szDesc = 4;
+//}
+///// KNCP_RESPONSE_SUBMIT_REVIEW
+//message KNCP_RESPONSE_SUBMIT_REVIEW {
+//    uint32 nErrCode = 1;
+//}
+/////-----------------
+///// KNCP_REQUEST_GETTEMPLATE
+//message KNCP_REQUEST_GETTEMPLATE {
+//    bytes szName = 1;
+//}
+///// KNCP_RESPONSE_GETTEMPLATE
+//message KNCP_RESPONSE_GETTEMPLATE {
+//    uint32 nErrCode = 1;
+//    bytes szFilename = 2;
+//    bytes dt = 4; /// 模板数据
+//}
+////KNCP_RESPONSE_LSTEMPLATE;
+//message KNCP_RESPONSE_LSTEMPLATE {
+//    uint32 nErrCode = 1;
+//    repeated bytes szName = 2;
+//}
+/////-----------------
+///// KNCP_REQUEST_UNDO
+//message KNCP_REQUEST_UNDO {
+//    uint64 nObjId = 1;
+//    uint32 nOp = 2;
+//}
+///// KNCP_RESPONSE_UNDO
+//message KNCP_RESPONSE_UNDO {
+//    uint32 nErrCode = 1;
+//}
+//
+///// 被授权用户 主动取消授权文件和目录的消息
+//message KNCP_REQUEST_CANCEL_PRIV {
+//    repeated uint64 nFileIdArray = 2; ///< 被授权文件id列表
+//}
+//message KNCP_KEY_VALUE {
+//    uint64 nId = 1;
+//    uint32 nValue = 2;
+//}
+//message KNCP_RESPONSE_CANCEL_PRIV {
+//    uint32 nErrCode = 1; ///< 全部成功时, 值为0
+//    repeated KNCP_KEY_VALUE recs = 2; ///< 有失败记录时, 返回[fileId:nErrorCode]数组.
+//}
+//
+///// 客户端请求获取部门列表消息
+////请求消息:  KNCP_REQUEST_DEPT_LIST
+//
+//message KNCP_DEPT_INFO {
+//    uint32 nDeptId = 1;
+//    bytes szDeptName = 2;
+//    bytes szFullDeptName = 3;
+//    bytes szDeptCode = 4;
+//    uint32 nType = 5;
+//}
+//message KNCP_RESPONSE_DEPT_LIST {
+//    uint32 nErrCode = 1; ///< 全部成功时, 值为0
+//    repeated KNCP_DEPT_INFO recs = 2; ///< 部门列表
+//}
+//
+///// 客户端注册用户消息
+////请求消息:  KNCP_REQUEST_REGISTER
+//message KNCP_REQUEST_REGISTER {
+//    bytes szUserName = 1; ///< 用户姓名, 可以重名
+//    bytes szEmail = 2; ///< 用户email,默认为证书内的email
+//    bytes szEncryptCert = 3; ///< 用户加密证书, 可以包含签名功能,DER格式(二进制)
+//    bytes szSignCert = 4; ///< 用户签名证书, 单证书时可以为空,DER格式(二进制)
+//    uint32 nDeptId = 5; ///< 用户注册的部门id, 为1表示总部
+//    uint32 nSecLevel = 6; ///< 用户seclevel
+//    bytes szDesc = 7; ///< 用户描述
+//    bytes szUserCn = 8;
+//    uint32 nClienttype = 9; ///< 客户端类型 0:网络保险箱  1：安全云盘
+//}
+//
+//message KNCP_RESPONSE_REGISTER {
+//    uint32 nError = 1;
+//    uint32 nErrorNum = 2;
+//}
+//
+//// 返回 KNCP_RESPONSE
+//
+//// 创建无key打印随机码消息
+//message KNCP_REQUEST_CREATE_PRINT_CODE {
+//    bytes szPrintCode = 1; /// MD5(随机码)
+//}
+//
+//message KNCP_RESPONSE_CREATE_PRINT_CODE {
+//    uint32 nErrCode = 1; /// 全部成功时, 值为0
+//}
+//
+//// 获取服务器全局配置参数
+//message KNCP_REQUEST_GET_SERVER_CONFIG {
+//    uint32 nType = 1; //参数类型
+//}
+//
+//message KNCP_SEC_LEVEL {
+//    uint32 nId = 1; //密级id
+//    bytes szSecLevelName = 2; //密级名称
+//    uint32 nOrder = 3; //密级顺序
+//}
+//
+//message KNCP_RESPONSE_GET_SERVER_CONFIG {
+//    uint32 nErrCode = 1; // 全部成功时, 值为0
+//    bool bPrintWithoutKey = 2; // 是否支持无key打印
+//    uint32 nUserSecLevel = 3; // 用户密级
+//    uint32 nServerSecLevel = 4; // 服务器密级
+//    repeated KNCP_SEC_LEVEL rFileSecLevelList = 5; // 所有支持的文件密级列表
+//    repeated KNCP_SEC_LEVEL rUserSecLevelList = 6; // 所有支持的用户密级列表
+//    uint32 nEncryptionType = 7; //加密算法
+//    bool nCurlEncryption = 8; //curl是否需要加密
+//    bool nMailOrCn = 9; //证书标识使用mail项还是CN项
+//    bool nLeaveMessage = 10; //是否支持授权消息发送
+//    bool nUseNds5 = 11; //是否使用网盾保险箱
+//    uint32 nMaxConnectNum = 12; //文件传输最大连接数
+//    bool nSecLevelInfo = 13; //是否显示文件最低密级信息
+//    bool nSelectSecLevel = 14; //新建，添加等操作是否强制手动选择文件密级
+//    bool nServerCluster = 15; //是否支持服务器集群
+//    bool nLdapCluster = 16; //是否支持LDAP集群
+//    bool nAutoUnlock = 17; //是否支持自动解锁
+//    bool nAutoRegistered = 18; //是否支持自动注册
+//    uint32 nTimeOut = 19; //协议传输超时时间
+//    uint32 nKeepAlive = 20; //KEEPALIVESECOND心跳包时间    秒
+//    uint32 nClientTimeOut = 21; //离开锁屏时间，分钟
+//    bool bKeyOffAutoquit = 22; //拔key自动退出
+//    bool bNonetmpFile = 23; //传输和加解密不保存中间文件
+//    bool bFloatDlg = 24; //是否显示悬浮框
+//    bool nSharedEditing = 25; // 是否支持共享编辑
+//    bool bCloudCoffer = 26; //是否支持云保险箱
+//    uint32 nWithoutKeyPolicy = 27; //无key打印策略
+//    bool bUseSeclevel = 28; //是否使用密级
+//    bool bRememberPassword = 29; //是否记住密码
+//    bytes sSetTitleName = 30; //设置标题栏名称
+//    bytes sSearchInterval = 31; //一键搜间隔时间（分钟）
+//    bytes sFileFormat = 32; //一键搜的文件格式
+//    uint64 nFileScope = 33; //一键搜目录范围
+//    bool bStartCheck = 34; //启动检测一键搜
+//    bool bShowFile = 35; //打开时是否显示水印
+//    bool bPrintLimit = 36; //是否允许打印
+//    uint32 nWaterMarkPlace = 37; //水印位置
+//    uint32 nWaterMarkLarge = 38; //水印大小
+//    bytes nWaterMarkColor = 39; //水印颜色
+//    uint32 nValidTime = 40; //内控文档输出有效期
+//    bool bAllowdChange = 41; //是否允许用户修改配置参数
+//    uint32 nFileManage = 42; //一键搜文件处理方式
+//    bytes sUnRegisterPrompt = 43; //未注册时提示信息
+//}
+//
+//message KNCP_LEAVE_MESSAGE {
+//    uint32 srcId = 1; //send user id
+//    string title = 2; //messgae title
+//
+//    message KNCP_LEAVE_MSG_DSTCN {
+//        uint32 dstId = 1;
+//    }
+//
+//    repeated KNCP_LEAVE_MSG_DSTCN message = 3; //receive user id
+//    string sendMsg = 4; //message
+//    string msgType = 5; //0 or 1
+//    string delaytime = 6;
+//}
+//
+//message KNCP_LEAVE_MSG_RESPONSE {
+//    int32 errMode = 1; //err code
+//    string dstCn = 2; //receive user cn
+//    string dstEmail = 3; //receive user email
+//
+//}
+//
+//message KNCP_LEAVE_MSG_MULTI_RESPONSE {
+//    repeated KNCP_LEAVE_MSG_RESPONSE message = 1;
+//}
+//
+////ntype = 0 ; 取文件的授权用户列表
+////ntype = 1 ; 取文件的审批人员列表
+//message KNCP_GET_REVIEW_AND_USER_INFO {
+//    uint32 nType = 1;
+//    uint32 nFileId = 2; //文件ID
+//}
+//
+//message KNCP_RESPONSE_GET_USER_INFO {
+//    uint32 nErrCode = 1; //成功返回0
+//    repeated KNCP_USER_RECORD recs = 2;
+//}
+//
+//message KNCP_SEND_SAMBA_INFO {
+//    uint32 nFileId = 1; //需要共享操作的文件
+//}
+//
+//message KNCP_RESPONSE_SAMBA_INFO {
+//    uint32 nError = 1; //成功为0
+//    string nNode = 2; //共享节点
+//    string LoginName = 3; //登录用户名
+//    string nPasswd = 4; //登录共享节点密码
+//}
+//
+//message KNCP_GET_RESIGER_INFO_REQUEST {
+//    string szUserCn = 1;
+//}
+//
+//message KNCP_GET_REGISTRA_INFO_RESPONSE {
+//    uint32 nError = 1;
+//    bool bChoseDept = 2; // 是否支持选择部门
+//    bool bChoseSec = 3; // 是否支持选择密级
+//    repeated KNCP_SEC_LEVEL rUserSecLevelList = 4; // 所有支持的用户密级列表
+//    repeated KNCP_DEPT_INFO deptInfo = 5; // 部门信息
+//    uint32 nServerSec = 6;
+//}
+//
+//message KNCP_REMOVE_SAMBA_DIR {
+//    uint32 nFlag = 1;
+//    string nSambaPath = 2;
+//}
+//message KNCP_RESPONSE_REMOVE_SAMBA_DIR {
+//    uint32 nError = 1;
+//}
+//
+//message KNCP_REQUEST_USERGROUP_INFO {
+//    uint64 nFileId = 1;
+//    repeated uint32 nUserId = 2;
+//}
+//
+//message KNCP_RESPONSE_USERGROUP_INFO {
+//    uint32 nError = 1;
+//}
+//message KNCP_REQUEST_LS_USERGROUP {
+//    uint64 nFileId = 2;
+//}
+//
+//message KNCP_RESPONSE_LS_USERGROUP {
+//    uint32 nError = 1;
+//    repeated uint32 nUserId = 2;
+//}
+//
+//message KNCP_WHITE_LIST_REQUEST {
+//    uint32 nFlag = 1;
+//}
+//
+//message KNCP_WHITE_LIST_RESPONSE {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_PROGRESS_NAME recs = 2; //白名单列表
+//}
+//
+//message KNCP_PROGRESS_NAME {
+//    bytes sProgressName = 1;
+//}
+//
+//message KNCP_REQUEST_PRINTCODE {
+//    uint32 nFlag = 1;
+//}
+//
+//message KNCP_RESPONSE_PRINTCODE {
+//    uint32 nErrCode = 1;
+//    bytes sPrintCode = 2;
+//}
+//
+////增加文件分享
+//
+////验证分享码
+//message KNCP_REQUEST_VERIFY_SHARECODE {
+//    uint64 nFileId = 1;
+//    bytes sShareCode = 2;
+//
+//}
+//
+//message KNCP_RESPONSE_VERIFY_SHARECODE {
+//    uint32 nErrCode = 1;
+//    uint32 nStatus = 2; //0:未重复  1:分享码已存在
+//    bytes sPath = 3; //信封路径
+//    bytes sOldPath = 4; //老信封路径
+//}
+//
+////提交分享码
+//message KNCP_REQUEST_COMMIT_SHARECODE {
+//    uint32 nType = 1;
+//    bytes szBeginTime = 2;
+//    bytes szEndTime = 3;
+//    bytes sShareCode = 4;
+//    bytes sPath = 5;
+//    uint64 nFileId = 6;
+//    bytes sShareUser = 7;
+//    repeated uint32 nReviewerId = 8; //审批员id
+//    uint32 nPeriod = 9; //分享周期
+//}
+//
+//message KNCP_RESPONSE_COMMIT_SHARECODE {
+//    uint32 nErrCode = 1;
+//}
+//
+////取消分享
+//message KNCP_REQUEST_CANCEL_SHAREFILE {
+//    uint64 nFileId = 1;
+//}
+//
+//message KNCP_RESPONSE_CANCEL_SHAREFILE {
+//    uint32 nErrCode = 1;
+//}
+//
+////获取分享信息
+//message KNCP_REQUEST_SHARE_INFO {
+//    uint64 nFileId = 1;
+//    bytes sShareCode = 2;
+//    uint32 nFlag = 3; //0:查询一个文件 1:查询所有文件
+//    uint32 nOpenFlag = 4; //0:查询文件  1：打开文件单个文件
+//    bytes sShareUser = 5; //用户信息 mail或cn
+//}
+//
+//message KNCP_RESPONSE_SHARE_INFO {
+//    uint32 nErrCode = 1;
+//    repeated KNCP_SHARE_FILE_INFO info = 2;
+//}
+//
+//message KNCP_SHARE_FILE_INFO {
+//    uint32 nReviewStatus = 1; //获取分享文件审批状态, 0 待审批 1 审批通过 2 审批拒绝
+//    uint32 nType = 2;
+//    bytes szBeginTime = 3;
+//    bytes szEndTime = 4;
+//    bytes sShareCode = 5;
+//    bytes sEnvelopPath = 6;
+//    bytes sFilePath = 7;
+//    uint64 nFileId = 8;
+//    bytes sShareUser = 9;
+//    bytes sfilename = 10;
+//}
+//
+//message KNCP_FILE_SEARCH_AUDIT_INFO {
+//    bytes sFileName = 1; //文件名称
+//    bytes sFilePath = 2; //文件路径
+//    bytes sTime = 3; //操作时间
+//    bytes sResult = 4; //结果信息
+//    uint64 nFileSize = 5; //文件大小
+//}
+//
+//message KNCP_FILE_SEARCH_AUDIT {
+//    uint32 type = 1;
+//    repeated KNCP_FILE_SEARCH_AUDIT_INFO info = 2;
+//}
+//
+//message KNCP_RESPONSRE_FILE_SEARCH_AUDIT {
+//    uint32 nErrcode = 1;
+//}

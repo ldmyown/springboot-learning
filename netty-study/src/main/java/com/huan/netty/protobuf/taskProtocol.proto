@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package com.huan.netty.protobuf;
+option java_package = "com.huan.netty.protobuf";
+option java_outer_classname = "TaskProtobufWrapper";
+
+// netty 编解码的根对象
+message TaskProtocol {
+
+    // 该数据包的类型
+    PackType packType = 1;
+
+    // 同一时刻,oneof 声明下的字段只有一个有值，后赋值的会覆盖先赋值的
+    oneof Pack {
+        LoginPack loginPack = 2;
+        CreateTaskPack createTaskPack = 3;
+        DeleteTaskPack deleteTaskPack = 4;
+    }
+}
+
+// 包的类型
+enum PackType {
+    LOGIN = 0;
+    CREATE_TASK = 1;
+    DELETE_TASK = 2;
+}
+
+// 登录数据包
+message LoginPack {
+    string username = 1;
+    string password = 2;
+}
+
+// 创建任务数据包
+message CreateTaskPack {
+    string taskId = 1;
+    sint64 createTime = 2;
+    string taskName = 3;
+}
+
+// 删除任务数据包
+message DeleteTaskPack {
+    repeated string taskId = 1;
+}
+

@@ -1,0 +1,31 @@
+
+
+person:
+  lastName: 张三${random.value}
+  age: ${random.int(10,20)}
+  boss: false
+  birth: 2000/12/12
+  maps:
+    k1: v1
+    k2: v2
+  list:
+    - v1
+    - v2
+  dog:
+    name: 阿黄
+    age: 2
+
+spring:
+  profiles:
+    active: prod
+
+---
+server:
+  port: 8081
+spring:
+  profiles: dev
+---
+server:
+  port: 8082
+spring:
+  profiles: prod
