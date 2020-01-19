@@ -18,7 +18,6 @@ WebUploader.Uploader.register({
         // 根据文件内容来查询MD5
         uploader.md5File(file).progress(function (percentage) {   // 及时显示进度
             console.log('计算md5进度:', percentage);
-            percentage = percentage.toFixed(2);
             // 生成md5进度条
             getProgressBar(file, percentage, "MD5", "MD5");
         }).then(function (val) { // MD5计算完成
@@ -147,7 +146,7 @@ uploader.onUploadBeforeSend = function (obj, data) {
 
 // 上传过程中触发，携带上传进度
 uploader.on('uploadProgress', function (file, percentage) {
-    percentage = percentage.toFixed(2);
+    percentage = percentage.toFixed(2)
     getProgressBar(file, percentage, "FILE", "上传进度");
 });
 

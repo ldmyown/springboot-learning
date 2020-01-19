@@ -44,7 +44,8 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
 
     private static final HttpDataFactory FACTORY = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE);
 
-    private String url;
+    private final String url;
+    private String webroot = HttpFileServer.WEBROOT;
 
     private HttpPostRequestDecoder decoder;
 
@@ -260,10 +261,10 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
             uri = "/";
         }
         if ("/".equalsIgnoreCase(uri.trim())) {
-            uri = url;
+            uri = webroot;
         }
-        if (!uri.startsWith(url)) {
-            uri = url + uri;
+        if (!uri.startsWith(webroot)) {
+            uri = webroot + uri;
         }
         final String path = sanitizeUri(uri);
         if (path == null) {
@@ -420,7 +421,7 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
         builder.append(dirPath).append("目录:");
         builder.append("</h3>\r\n");
         builder.append("<ul>");
-        builder.append("<li>链接：<a href=\"" + dir.getParent().replace(url, "") + "/\">..</a></li>\r\n");
+        builder.append("<li>链接：<a href=\"" + dir.getParent().replace(webroot, "") + "/\">..</a></li>\r\n");
         for (File f : dir.listFiles()) {
             if (f.isHidden() || !f.canRead()) {
                 continue;
@@ -430,7 +431,7 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
 //                continue;
 //            }
             builder.append("<li>链接：<a href=\" ");
-            builder.append(dirPath.replace(url, "") + "/" + fname);
+            builder.append(dirPath.replace(webroot, "") + "/" + fname);
             builder.append("\" >");
             builder.append(fname);
             builder.append("</a></li>\r\n");
@@ -475,5 +476,6 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
         decoder.destroy();
         decoder = null;
     }
+
 
 }

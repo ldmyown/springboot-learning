@@ -39,5 +39,4 @@ public class UserServiceImpl implements UserService {
     public void deleteUserById(Long id) {
         userMapper.delete(id);
     }
-
 }

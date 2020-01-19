@@ -64,11 +64,7 @@ public class StorageServiceImpl implements StorageService {
         File[] confMd5files = confDir.listFiles();
         for (File confMd5file : confMd5files) {
             String md5 = confMd5file.getName();
-            File[] files = confMd5file.listFiles();
-            if (files.length == 0) {
-                continue;
-            }
-            File confFile = files[0];
+            File confFile = confMd5file.listFiles()[0];
             byte[] bytes = FileUtils.readFileToByteArray(confFile);
             boolean flag = true;
             for (int i = 0; i < bytes.length; i++) {
@@ -95,34 +91,28 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public void uploadFileRandomAccessFile(MultipartFileParam param) throws IOException {
-        RandomAccessFile accessFile = null;
-
-        String fileName;
-        File tmpFile;
-        try {
-            fileName = param.getName();
+        String fileName = param.getName();
+        String dirPath = rootPath + param.getMd5();
             String tmpFileName = fileName + "_tmp";
-            File dir = new File(rootPath, DateUtils.format(new Date()));
-            tmpFile = new File(dir, tmpFileName);
+        File dir = new File(dirPath);
+        File tmpFile = new File(dir, tmpFileName);
             if (!dir.exists()) {
-                dir.mkdirs();
+            tmpFile.mkdirs();
             }
+
+        RandomAccessFile accessFile = new RandomAccessFile(tmpFile, "rw");
             long offset = chunkSize * param.getChunk();
-            accessFile = new RandomAccessFile(tmpFile, "rw");
             // 定义分片的偏移量
             accessFile.seek(offset);
             // 将分片数据写入到文件中
             accessFile.write(param.getFile().getBytes());
-        } finally {
-            if (accessFile != null) {
+        // 释放流
                 accessFile.close();
-            }
-        }
+
         // 检测是否已经传输完成，并且设置传输进度
         Boolean isOk = checkAndSetProgress(param);
         if(isOk) {
-            boolean result = renameFile(tmpFile, fileName);
-            log.info("重命名结果：{}", result);
+            renameFile(tmpFile, fileName);
             log.info("文件{}上传完成", fileName);
         }
 
@@ -161,7 +151,7 @@ public class StorageServiceImpl implements StorageService {
         Boolean isOk = checkAndSetProgress(param);
         if(isOk) {
             boolean result = renameFile(tmpFile, fileName);
-            log.info("重命名结果：{}", result);
+            log.info("重命名结果：{}", Boolean.valueOf(result));
             log.info("文件{}上传完成", fileName);
         }
 
